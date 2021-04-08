@@ -99,6 +99,7 @@ Now that you have completed your initial analysis, design a Flask API based on t
   * Return a JSON list of stations from the dataset.
 
 * `/api/v1.0/tobs`
+
   * Query the dates and temperature observations of the most active station for the last year of data.
 
   * Return a JSON list of temperature observations (TOBS) for the previous year.
