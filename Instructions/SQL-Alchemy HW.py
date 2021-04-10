@@ -1,6 +1,6 @@
 #SQL-Alchemy HW
 
-#51:09
+from datetime import datetime
 
 import numpy as np
 
@@ -71,24 +71,51 @@ def Stations():
 ##Return a JSON list of temperature observations (TOBS) for the previous year.
 
 @app.route("/api/v1.0/tobs")
-def Tobs():
+def tobs():
     session = Session(engine)
     #ALL = session.query(M,S).outerjoin(M.station == S.station).all()
     station_activity = session.query(M.station, func.count(M.station)).group_by(M.station).order_by(func.count(M.station).desc()).limit(1).all()
     station_act = list(np.ravel(station_activity))
     station_id = station_act[0]
 
-    date_activity = session.query(M.date).order_by((M.date).desc()).limit(1).all()
+    date_activity = session.query(M.date, M.tobs).order_by((M.date).desc()).limit(1).all()
     date_act = list(np.ravel(date_activity))
     date_id = date_act[0]
-    #date_id = 2017-08-23
-
-    last_yr_date = '2016-08-23'
+    date_id_dt = datetime.strptime(date_id, '%Y-%m-%d')
+    last_yr_date = (f"{date_id_dt.year -1}-0{date_id_dt.month}-{date_id_dt.day}")
+    
     tobs_info = session.query(M.tobs).filter(S.station == station_id).filter(M.date >= last_yr_date).all()
     all_tobs = list(np.ravel(tobs_info))
     session.close
 
     return jsonify(all_tobs)
+
+@app.route("/api/v1.0/<start>")
+def kevin(start):
+    session = Session(engine)
+    Mdates = session.query(M.date).all()
+    MMdates = list(np.ravel(Mdates))
+    MMlist = []
+    for date in MMdates:
+        MMlist.append(date)
+
+    canonicalized = start
+    for date in MMlist:
+        search_term = date
+
+        if search_term == canonicalized:
+            avgtemp = session.query(func.avg(M.tobs)).filter(M.date >= date).all()
+            for temp in avgtemp:
+                aaa = temp
+
+            for temp_ave in aaa:
+                return jsonify(
+                    f"The average temp since {start} is: {temp_ave}"
+                    )
+
+    return jsonify("YOU SUCK PAL TRY AGAIN"), 404
+    
+    #return jsonify(MMlist)
 
 ###----------------------------------------------------------------
 ##Return a JSON list of the minimum temperature, the average temperature, 
@@ -105,7 +132,7 @@ def start_only(start):
     date_act_start = list(np.ravel(date_activity_start))
 
     for date in date_activity_start:
-        search_term = date['start'].lower()
+        search_term = date
 
     x = session.query(M.date).filter(M.date >= search_term).all()
     x_list = list(np.ravel(x))
@@ -149,8 +176,9 @@ def home():
         f" /api/v1.0/<start> <br>"
         "<br>"
         f"for temperature info between two dates type the following onto the end of the task bar (earliest date is {date_id_first}, latest date is {date_id_last}):<br>"
-        f" /api/v1.0/<start>/<end>"
+        f" /api/v1.0/<start>/<end> <br>"
         f"<br>"
+        f" /api/v1.0/kevin"
         f"<br>"
         f"<br>"
         f"<br>"
