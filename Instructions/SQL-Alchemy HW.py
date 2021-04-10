@@ -105,12 +105,43 @@ def kevin(start):
 
         if search_term == canonicalized:
             avgtemp = session.query(func.avg(M.tobs)).filter(M.date >= date).all()
-            for temp in avgtemp:
-                aaa = temp
+            maxtemp = session.query(func.max(M.tobs)).filter(M.date >= date).all()
+            mintemp = session.query(func.min(M.tobs)).filter(M.date >= date).all()
 
-            for temp_ave in aaa:
-                return jsonify(
-                    f"The average temp since {start} is: {temp_ave}"
+            for temp in avgtemp:
+                avg = temp
+
+            for temp_ave in avg:
+                average_temp = temp_ave
+
+            for mxtemp in maxtemp:
+                maxt = mxtemp
+
+            for temp_max in maxt:
+                maximum_temp = temp_max
+                
+            for mntemp in mintemp:
+                mint = mntemp
+
+            for temp_min in mint:
+                minimum_temp = temp_min
+
+            station_activity = session.query(M.station, func.count(M.station)).group_by(M.station).order_by(func.count(M.station).desc()).limit(1).all()
+            station_act = list(np.ravel(station_activity))
+            station_id = station_act[0]
+                
+                
+            return (
+                    f"In relation to station {station_id} and provided date {start}:"
+                    f"<br>"
+                    f"<br>"
+                    f"The average temp is {average_temp}"
+                    f"<br>"
+                    f"<br>"
+                    f"The maximum temp is {maximum_temp}"
+                    f"<br>"
+                    f"<br>"
+                    f"The minimum temp is {minimum_temp}"
                     )
 
     return jsonify("YOU SUCK PAL TRY AGAIN"), 404
