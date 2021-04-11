@@ -84,11 +84,17 @@ def tobs():
     date_id_dt = datetime.strptime(date_id, '%Y-%m-%d')
     last_yr_date = (f"{date_id_dt.year -1}-0{date_id_dt.month}-{date_id_dt.day}")
     
-    tobs_info = session.query(M.tobs).filter(S.station == station_id).filter(M.date >= last_yr_date).all()
-    all_tobs = list(np.ravel(tobs_info))
+    tobs_info = session.query(M.date, M.tobs).filter(S.station == station_id).filter(M.date >= last_yr_date).all()
     session.close
 
-    return jsonify(all_tobs)
+    date_tobs = []
+    for date, tobs in tobs_info:
+        datob_dict = {}
+        datob_dict["date"] = date
+        datob_dict["tobs"] = tobs
+        date_tobs.append(datob_dict)
+
+    return jsonify(date_tobs)
 
 ###----------------------------------------------------------------
 ##Return a JSON list of the minimum temperature, the average temperature, 
