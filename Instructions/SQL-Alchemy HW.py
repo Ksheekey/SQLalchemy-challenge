@@ -82,7 +82,9 @@ def tobs():
     date_act = list(np.ravel(date_activity))
     date_id = date_act[0]
     date_id_dt = datetime.strptime(date_id, '%Y-%m-%d')
-    last_yr_date = (f"{date_id_dt.year -1}-0{date_id_dt.month}-{date_id_dt.day}")
+    just_month = date_id_dt.month
+    format_month = '{:02d}'.format(just_month)
+    last_yr_date = (f"{date_id_dt.year -1}-0{format_month}-{date_id_dt.day}")
     
     tobs_info = session.query(M.date, M.tobs).filter(S.station == station_id).filter(M.date >= last_yr_date).all()
     session.close
@@ -213,8 +215,18 @@ def date_tart(tart,end):
     return jsonify("YOU STINK PAL, TRY AGAIN"), 404
  
  
- 
-
+###----------------------------------------------------------------
+@app.route("/api/v1.0/kevin")
+def kevin():
+    session = Session(engine)
+    date_activity = session.query(M.date, M.tobs).order_by((M.date).desc()).limit(1).all()
+    date_act = list(np.ravel(date_activity))
+    date_id = date_act[0]
+    date_id_dt = datetime.strptime(date_id, '%Y-%m-%d')
+    just_month = date_id_dt.month
+    format_month = '{:02d}'.format(just_month)
+    last_yr_date = (f"{date_id_dt.year -1}-{format_month}-{date_id_dt.day}")
+    return (f"{last_yr_date}" )
 ###----------------------------------------------------------------
 
 # homepage
